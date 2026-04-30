@@ -44,7 +44,7 @@ const RESPONSIVE_DIR = 'responsive';
 const SOCIAL_DIR = 'social';
 const OG_IMAGE_REL = `${SOCIAL_DIR}/og-share-20.jpg`;
 const OSM_GEO = { latitude: 47.0335704, longitude: 15.3952469 };
-const HAS_MAP_URL = 'https://www.openstreetmap.org/?mlat=47.0335704&mlon=15.3952469#map=19/47.0335704/15.3952469';
+const HAS_MAP_URL = 'https://maps.app.goo.gl/Absk5FRMgyCuUwxe9';
 const HEAD_TAGS = new Set(['META', 'TITLE', 'LINK', 'STYLE', 'SCRIPT', 'BASE']);
 const BUSINESS_DETAILS = {
   '@type': 'ProfessionalService',
@@ -315,7 +315,8 @@ function updateJsonLd(document, fileName) {
           business.image = Array.from(new Set([
             ...(Array.isArray(business.image) ? business.image : business.image ? [business.image] : []),
             absoluteUrl('hero-bild.webp'),
-            absoluteUrl('20.webp')
+            absoluteUrl('13.webp'),
+            absoluteUrl('33.webp')
           ]));
         }
         script.textContent = JSON.stringify(payload);
@@ -482,29 +483,35 @@ async function buildResponsiveImages() {
 
 async function createOgShareImage() {
   await fs.mkdir(path.join(ROOT, SOCIAL_DIR), { recursive: true });
-  const overlaySvg = `
-    <svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="rgba(28,20,18,0.05)" />
-          <stop offset="100%" stop-color="rgba(28,20,18,0.22)" />
-        </linearGradient>
-      </defs>
-      <rect width="1200" height="630" fill="url(#fade)" />
-      <rect x="44" y="40" width="470" height="120" rx="32" fill="rgba(255,248,244,0.88)" />
-    </svg>
-  `;
-  const logoBuffer = await sharp(path.join(ROOT, 'logo-liza.png'))
-    .resize({ width: 360 })
-    .png()
-    .toBuffer();
+  const collageImages = ['33.webp', 'hero-bild.webp', '1.webp', '20.webp', 'DSC02070.webp', '24.webp'];
+  const tileWidth = 386;
+  const tileHeight = 300;
+  const gap = 10;
+  const composites = [];
 
-  await sharp(path.join(ROOT, '20.webp'))
-    .resize(1200, 630, { fit: 'cover', position: 'centre' })
-    .composite([
-      { input: Buffer.from(overlaySvg) },
-      { input: logoBuffer, top: 60, left: 74 }
-    ])
+  for (const [index, image] of collageImages.entries()) {
+    const left = gap + (index % 3) * (tileWidth + gap);
+    const top = gap + Math.floor(index / 3) * (tileHeight + gap);
+    const input = await sharp(path.join(ROOT, image))
+      .resize(tileWidth, tileHeight, {
+        fit: 'cover',
+        position: image === 'DSC02070.webp' ? 'top' : 'centre'
+      })
+      .jpeg({ quality: 88, mozjpeg: true })
+      .toBuffer();
+
+    composites.push({ input, left, top });
+  }
+
+  await sharp({
+    create: {
+      width: 1200,
+      height: 630,
+      channels: 3,
+      background: '#f4e2d8'
+    }
+  })
+    .composite(composites)
     .jpeg({ quality: 88, mozjpeg: true })
     .toFile(path.join(ROOT, OG_IMAGE_REL));
 }
