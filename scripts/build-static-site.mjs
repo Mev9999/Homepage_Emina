@@ -484,6 +484,7 @@ async function buildResponsiveImages() {
 async function createOgShareImage() {
   await fs.mkdir(path.join(ROOT, SOCIAL_DIR), { recursive: true });
   const collageImages = ['33.webp', 'hero-bild.webp', '1.webp', '20.webp', 'DSC02070.webp', '24.webp'];
+  const containedImages = new Set(['1.webp', 'DSC02070.webp']);
   const tileWidth = 386;
   const tileHeight = 300;
   const gap = 10;
@@ -492,13 +493,37 @@ async function createOgShareImage() {
   for (const [index, image] of collageImages.entries()) {
     const left = gap + (index % 3) * (tileWidth + gap);
     const top = gap + Math.floor(index / 3) * (tileHeight + gap);
-    const input = await sharp(path.join(ROOT, image))
-      .resize(tileWidth, tileHeight, {
-        fit: 'cover',
-        position: image === 'DSC02070.webp' ? 'top' : 'centre'
-      })
-      .jpeg({ quality: 88, mozjpeg: true })
-      .toBuffer();
+    const imagePath = path.join(ROOT, image);
+    let input;
+
+    if (containedImages.has(image)) {
+      const background = await sharp(imagePath)
+        .resize(tileWidth, tileHeight, { fit: 'cover', position: 'centre' })
+        .blur(18)
+        .composite([{
+          input: Buffer.from(`<svg width="${tileWidth}" height="${tileHeight}" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#f4e2d8" opacity="0.18"/></svg>`)
+        }])
+        .jpeg({ quality: 88, mozjpeg: true })
+        .toBuffer();
+
+      const foreground = await sharp(imagePath)
+        .resize(tileWidth - 16, tileHeight - 16, {
+          fit: 'contain',
+          background: { r: 244, g: 226, b: 216, alpha: 0 }
+        })
+        .png()
+        .toBuffer();
+
+      input = await sharp(background)
+        .composite([{ input: foreground, gravity: 'centre' }])
+        .jpeg({ quality: 88, mozjpeg: true })
+        .toBuffer();
+    } else {
+      input = await sharp(imagePath)
+        .resize(tileWidth, tileHeight, { fit: 'cover', position: 'centre' })
+        .jpeg({ quality: 88, mozjpeg: true })
+        .toBuffer();
+    }
 
     composites.push({ input, left, top });
   }
