@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "gallery:import": "node scripts/import-gallery-images.mjs"
+  },
   "devDependencies": {
     "jsdom": "^24.1.3",
     "sharp": "^0.34.5"
