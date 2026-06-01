@@ -2,7 +2,7 @@
   // Update future homepage promotions here.
   const HOME_PROMO_CONFIG = {
     startsAt: '2026-04-08T12:00:00+02:00',
-    endsAt: '2026-06-08T23:59:59+02:00',
+    endsAt: '2026-05-31T23:59:59+02:00',
     priceDiscountRate: 0.5,
     messages: {
       de: {
