@@ -1445,6 +1445,17 @@ form.contact .btn{
   margin-top: .2rem;
 }
 
+.contact-field-hint{
+  margin: .38rem .15rem 0;
+  color: var(--muted);
+  font-size: .82rem;
+  line-height: 1.45;
+}
+
+#partner-code{
+  letter-spacing: .035em;
+}
+
 #contact,
 #contact-form-card,
 #direct-contact-card{
@@ -3439,6 +3450,11 @@ display: flex;
               </div>
             </div>
             <div>
+              <label for="partner-code" data-i18n="form_partner_code_label">Partnerski kod pogodnosti (opcionalno)</label>
+              <input id="partner-code" name="partner_vorteilscode" type="text" data-i18n-placeholder="form_partner_code_placeholder" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="64" placeholder="Unesite kod sa letka">
+              <p class="contact-field-hint" data-i18n="form_partner_code_hint">Pogodnost će nakon provjere biti uračunata u vašu ponudu.</p>
+            </div>
+            <div>
               <label for="msg" data-i18n="form_msg_label">Poruka</label>
               <textarea id="msg" name="message" data-i18n-placeholder="form_msg_placeholder" required="" placeholder="Šta imate na umu? Lokacija, broj osoba, stil..."></textarea>
             </div>
@@ -3993,6 +4009,9 @@ faq_a13:"Ihr könnt direkt nach dem Shooting bar bezahlen oder die Rechnung bequ
     form_service_label:"Art des Shootings",
     form_date_label:"Wunschtermin",
     form_location_label:"Ort / Wunschlocation",
+    form_partner_code_label:"Partner-Vorteilscode (optional)",
+    form_partner_code_placeholder:"Code vom Flyer eingeben",
+    form_partner_code_hint:"Der Vorteil wird nach Prüfung bei deinem Angebot berücksichtigt.",
     form_msg_label:"Nachricht",
     form_submit:"Senden",
     opt_portrait:"Portrait",
@@ -4304,6 +4323,9 @@ faq_a13:"You can pay in cash directly after the session or transfer the invoice 
     form_service_label:"Type of shoot",
     form_date_label:"Preferred date",
     form_location_label:"Location / preferred place",
+    form_partner_code_label:"Partner benefit code (optional)",
+    form_partner_code_placeholder:"Enter the code from the flyer",
+    form_partner_code_hint:"The benefit will be applied to your quote after verification.",
     form_msg_label:"Message",
     form_submit:"Send",
     opt_portrait:"Portrait",
@@ -4615,6 +4637,9 @@ faq_a13:"Platiti možete u gotovini direktno nakon fotografisanja ili račun jed
     form_service_label:"Vrsta fotografisanja",
     form_date_label:"Željeni datum",
     form_location_label:"Lokacija / željeno mjesto",
+    form_partner_code_label:"Partnerski kod pogodnosti (opcionalno)",
+    form_partner_code_placeholder:"Unesite kod sa letka",
+    form_partner_code_hint:"Pogodnost će nakon provjere biti uračunata u vašu ponudu.",
     form_msg_label:"Poruka",
     form_submit:"Pošalji",
     opt_portrait:"Portret",
