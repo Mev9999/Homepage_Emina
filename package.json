@@ -1,6 +1,8 @@
 {
   "scripts": {
-    "gallery:import": "node scripts/import-gallery-images.mjs"
+    "gallery:import": "node scripts/import-gallery-images.mjs",
+    "site:build": "node scripts/generate-new-pages.mjs && node scripts/build-static-site.mjs",
+    "site:check": "node scripts/validate-site.mjs"
   },
   "devDependencies": {
     "jsdom": "^24.1.3",

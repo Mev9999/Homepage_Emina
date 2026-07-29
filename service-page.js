@@ -32,11 +32,28 @@
 
   const pageByFile = {
     'ueber-mich.html': 'about',
+    'portraitfotografie-graz.html': 'portrait',
     'babybauch-shooting-graz.html': 'babybauch',
     'babybauch-und-neugeborenen-shooting-graz.html': 'combo',
     'newborn-fotografie-graz.html': 'newborn',
     'familienfotografie-graz.html': 'familie',
     'hochzeitsfotograf-graz.html': 'hochzeit'
+  };
+  const serviceLinks = [
+    { key: 'portrait', href: 'portraitfotografie-graz.html' },
+    { key: 'maternity', href: 'babybauch-shooting-graz.html' },
+    { key: 'newborn', href: 'newborn-fotografie-graz.html' },
+    { key: 'family', href: 'familienfotografie-graz.html' },
+    { key: 'combo', href: 'babybauch-und-neugeborenen-shooting-graz.html' },
+    { key: 'wedding', href: 'hochzeitsfotograf-graz.html' }
+  ];
+  const priceAnchorByPage = {
+    portrait: 'portrait',
+    babybauch: 'babybauch',
+    newborn: 'neugeborene',
+    familie: 'familie',
+    combo: 'kombi',
+    hochzeit: 'hochzeit'
   };
 
   function stripLanguageSuffix(fileName){
@@ -115,6 +132,32 @@
   const siteHeaderNav = document.querySelector('.site-header .nav');
   const mobileNav = siteHeaderNav?.querySelector('.nav-links');
 
+  function ensureServiceLinks(){
+    const menu = mobileNav?.querySelector('.services-dropdown .nav-dropdown-menu');
+    if(menu){
+      menu.replaceChildren(...serviceLinks.map((service) => {
+        const link = document.createElement('a');
+        link.href = service.href;
+        link.dataset.serviceKey = service.key;
+        return link;
+      }));
+    }
+
+    const footerLinks = document.querySelector('.footer-primary-links');
+    if(footerLinks){
+      const portfolio = footerLinks.querySelector('a');
+      const links = serviceLinks.map((service) => {
+        const link = document.createElement('a');
+        link.href = service.href;
+        link.dataset.serviceKey = service.key;
+        return link;
+      });
+      footerLinks.replaceChildren(...(portfolio ? [portfolio, ...links] : links));
+    }
+  }
+
+  ensureServiceLinks();
+
   if(siteHeaderNav && mobileNav){
     mobileNav.id = mobileNav.id || 'mobile-nav';
     mobileNav.classList.add('primary');
@@ -159,6 +202,7 @@
     de: {
       languageLabel: 'Sprache wählen',
       nav: { home: 'Home', about: 'Über mich', services: 'Leistungen', portfolio: 'Portfolio', gallery1: 'Babybauch Galerie', gallery2: 'Neugeborenen Galerie', gallery3: 'Familien Galerie', gallery4: 'Hochzeits Galerie', pricing: 'Preise', faq: 'Häufige Fragen', contact: 'Kontakt' },
+      services: { portrait: 'Portrait', maternity: 'Babybauch', newborn: 'Neugeborene', family: 'Familie', combo: 'Babybauch & Neugeborene', wedding: 'Hochzeit' },
       breadcrumbs: { aria: 'Breadcrumb', home: 'Startseite', services: 'Leistungen' },
       contact: { email: 'E-Mail', phone: 'Telefon', location: 'Standort', more: 'Weitere Leistungen', locationValue: '8054 Graz' },
       footer: {
@@ -178,6 +222,7 @@
     en: {
       languageLabel: 'Choose language',
       nav: { home: 'Home', about: 'About', services: 'Services', portfolio: 'Portfolio', gallery1: 'Maternity Gallery', gallery2: 'Newborn Gallery', gallery3: 'Family Gallery', gallery4: 'Wedding Gallery', pricing: 'Pricing', faq: 'FAQs', contact: 'Contact' },
+      services: { portrait: 'Portrait', maternity: 'Maternity', newborn: 'Newborn', family: 'Family', combo: 'Maternity & Newborn', wedding: 'Wedding' },
       breadcrumbs: { aria: 'Breadcrumb', home: 'Home', services: 'Services' },
       contact: { email: 'Email', phone: 'Phone', location: 'Location', more: 'More services', locationValue: '8054 Graz' },
       footer: {
@@ -197,6 +242,7 @@
     bs: {
       languageLabel: 'Odaberi jezik',
       nav: { home: 'Početna', about: 'O meni', services: 'Usluge', portfolio: 'Portfolio', gallery1: 'Trudnička galerija', gallery2: 'Galerija novorođenčadi', gallery3: 'Porodična galerija', gallery4: 'Galerija vjenčanja', pricing: 'Cijene', faq: 'Česta pitanja', contact: 'Kontakt' },
+      services: { portrait: 'Portret', maternity: 'Trudničko', newborn: 'Novorođenčad', family: 'Porodica', combo: 'Trudničko & novorođenče', wedding: 'Vjenčanje' },
       breadcrumbs: { aria: 'Breadcrumb', home: 'Početna', services: 'Usluge' },
       contact: { email: 'E-mail', phone: 'Telefon', location: 'Lokacija', more: 'Ostale usluge', locationValue: '8054 Graz' },
       footer: {
@@ -516,19 +562,13 @@
     setText(refs.navLinks[5], commonStrings.nav.faq);
     setText(refs.navLinks[6], commonStrings.nav.contact);
 
-    if(refs.servicesMenuLinks.length >= 4){
-      setText(refs.servicesMenuLinks[0], commonStrings.footer.service1);
-      setText(refs.servicesMenuLinks[1], commonStrings.footer.service2);
-      setText(refs.servicesMenuLinks[2], commonStrings.footer.service3);
-      setText(refs.servicesMenuLinks[3], commonStrings.footer.service4);
-    }
+    refs.servicesMenuLinks.forEach((link) => {
+      setText(link, commonStrings.services[link.dataset.serviceKey] || '');
+    });
 
-    if(refs.mobileServiceLinks.length >= 4){
-      setText(refs.mobileServiceLinks[0], commonStrings.footer.service1);
-      setText(refs.mobileServiceLinks[1], commonStrings.footer.service2);
-      setText(refs.mobileServiceLinks[2], commonStrings.footer.service3);
-      setText(refs.mobileServiceLinks[3], commonStrings.footer.service4);
-    }
+    refs.mobileServiceLinks.forEach((link) => {
+      setText(link, commonStrings.services[link.dataset.serviceKey] || '');
+    });
 
     if(refs.portfolioMenuLinks.length >= 4){
       setText(refs.portfolioMenuLinks[0], commonStrings.nav.gallery1);
@@ -553,6 +593,12 @@
     setText(refs.heroLead, pageStrings.hero.lead);
     setText(refs.heroButtons[0], pageStrings.hero.primary);
     setText(refs.heroButtons[1], pageStrings.hero.secondary);
+    if(refs.heroButtons[0]){
+      refs.heroButtons[0].setAttribute('href', 'index.html#contact-form-card');
+    }
+    if(refs.heroButtons[1]){
+      refs.heroButtons[1].setAttribute('href', 'index.html#portfolio');
+    }
     if(refs.heroImage){
       refs.heroImage.alt = pageStrings.hero.imageAlt;
     }
@@ -646,8 +692,21 @@
 
     setText(refs.ctaTitle, pageStrings.cta.title);
     setHTML(refs.ctaText, pageStrings.cta.text);
+    if(refs.ctaText){
+      const priceNode = Array.from(refs.ctaText.querySelectorAll('strong'))
+        .find((node) => /\d+\s*(?:EUR|€)/i.test(node.textContent));
+      if(priceNode){
+        priceNode.setAttribute('data-promo-price', '');
+      }
+    }
     setText(refs.ctaButtons[0], pageStrings.cta.primary);
     setText(refs.ctaButtons[1], pageStrings.cta.secondary);
+    if(refs.ctaButtons[0]){
+      refs.ctaButtons[0].setAttribute('href', 'index.html#contact-form-card');
+    }
+    if(refs.ctaButtons[1] && priceAnchorByPage[pageKey]){
+      refs.ctaButtons[1].setAttribute('href', `preise.html#${priceAnchorByPage[pageKey]}`);
+    }
 
     setText(refs.contactTitle, pageStrings.contact.title);
 
@@ -661,10 +720,12 @@
     }
 
     setText(refs.footerPrimaryLinks[0], commonStrings.footer.portfolio);
-    setText(refs.footerPrimaryLinks[1], commonStrings.footer.service1);
-    setText(refs.footerPrimaryLinks[2], commonStrings.footer.service2);
-    setText(refs.footerPrimaryLinks[3], commonStrings.footer.service3);
-    setText(refs.footerPrimaryLinks[4], commonStrings.footer.service4);
+    refs.footerPrimaryLinks.forEach((link, index) => {
+      if(index === 0){
+        return;
+      }
+      setText(link, commonStrings.services[link.dataset.serviceKey] || '');
+    });
     setText(refs.footerSecondaryLinks[0], commonStrings.footer.contact);
     setText(refs.footerSecondaryLinks[1], commonStrings.footer.imprint);
     setText(refs.footerSecondaryLinks[2], commonStrings.footer.privacy);
@@ -677,6 +738,9 @@
     }
     updateLegalLinks(lang);
     updateInternalLinks(lang);
+    if(refs.navLinks[4]){
+      refs.navLinks[4].setAttribute('href', localizeHref('preise.html', lang));
+    }
     updateStructuredData(lang, pageStrings, commonStrings);
 
     if(refs.langBtn){
@@ -896,6 +960,216 @@
     }
   };
 
+  pages.portrait = {
+    de: {
+      metaTitle: 'Portraitfotografie in Graz | LiZa Memories Photography',
+      metaDescription: 'Persönliche Portraitfotografie in Graz mit entspannter Begleitung, natürlichen Posen und liebevoll bearbeiteten Bildern.',
+      ogTitle: 'Portraitfotografie in Graz | LiZa Memories Photography',
+      ogDescription: 'Natürliche Portraits in Graz mit ruhiger Anleitung und einem Ergebnis, das sich nach dir anfühlt.',
+      breadcrumbCurrent: 'Portraitfotografie Graz',
+      hero: {
+        eyebrow: 'Portraitfotografie',
+        title: 'Persönliche Portraits, die sich natürlich anfühlen und dich wirklich zeigen.',
+        lead: 'Ein Portraitshooting darf leicht und unkompliziert sein. Mit ruhiger Anleitung, passenden Bildvarianten und einem Blick für kleine Details entstehen Bilder, auf denen du dich wiedererkennst und gerne siehst.',
+        primary: 'Portraitshooting anfragen',
+        secondary: 'Portfolio ansehen',
+        points: [
+          { label: 'Dauer', value: 'Je nach Paket etwa 20 bis 30 Minuten' },
+          { label: 'Looks', value: 'Ein bis zwei Outfits und unterschiedliche Bildvarianten möglich' },
+          { label: 'Bildlieferung', value: 'Meist innerhalb von 72 Stunden für dich verfügbar' }
+        ],
+        imageAlt: 'Natürliches Portrait von Emina in warmer Umgebung'
+      },
+      section1: {
+        title: 'Was dein Portraitshooting besonders macht',
+        sub: 'Klare Vorbereitung, entspannte Anleitung und genug Raum für Bilder, die zu dir passen.',
+        card1: {
+          title: 'Natürlich und persönlich',
+          text: 'Du musst weder Erfahrung vor der Kamera haben noch wissen, wie du posieren sollst. Ich begleite dich ruhig durch das Shooting und achte darauf, dass Haltung, Ausdruck und Bildwirkung stimmig bleiben.',
+          items: [
+            'Sanfte Anleitung statt starrer oder überladener Posen.',
+            'Je nach Paket sind unterschiedliche Outfits und Bildlooks möglich.',
+            'Eine sorgfältige Auswahl und professionelle Bearbeitung deiner Lieblingsbilder.'
+          ]
+        },
+        card2: {
+          title: 'Entspannter Ablauf',
+          steps: [
+            'Kurze Anfrage mit deinem Wunschdatum und dem Anlass für die Portraits.',
+            'Gemeinsame Abstimmung zu Kleidung, Hintergrund und wichtigen Details.',
+            'Ruhiges Shooting mit verständlicher Anleitung und schneller Bildbearbeitung.'
+          ]
+        }
+      },
+      section2: {
+        title: 'Häufige Fragen zum Portraitshooting',
+        sub: 'Die wichtigsten Antworten, damit du dich von Anfang an gut vorbereitet fühlst.',
+        faqs: [
+          {
+            q: 'Muss ich Erfahrung vor der Kamera haben?',
+            a: 'Nein. Ich zeige dir während des Shootings Schritt für Schritt, welche Haltung und welcher Blick gut funktionieren. So musst du dir vorher keine Gedanken über Posen machen.'
+          },
+          {
+            q: 'Was soll ich zum Portraitshooting mitbringen?',
+            a: 'Bring am besten ein bis zwei Outfits mit, in denen du dich wohlfühlst. Ruhige Farben und Kleidung ohne große Logos wirken besonders harmonisch. Gemeinsam wählen wir aus, was zum gewünschten Bildlook passt.'
+          }
+        ]
+      },
+      gallery: {
+        title: 'Portrait',
+        sub: 'Natürliche Portraitfotografie mit ruhiger Bildsprache und persönlicher Ausstrahlung.'
+      },
+      cta: {
+        title: 'Portraitshooting in Graz anfragen',
+        text: 'Das Paket <strong>Kleine Erinnerung</strong> startet bei <strong>99 EUR</strong> und beinhaltet 20 Minuten Shooting, 3 bearbeitete Bilder, 1 Outfit und 1 Bildlook.',
+        primary: 'Jetzt anfragen',
+        secondary: 'Pakete ansehen'
+      },
+      contact: {
+        title: 'Direkter Kontakt',
+        moreServices: '<a href="babybauch-shooting-graz.html">Babybauch</a> · <a href="newborn-fotografie-graz.html">Neugeborene</a> · <a href="familienfotografie-graz.html">Familie</a>'
+      }
+    },
+    en: {
+      metaTitle: 'Portrait Photography Graz | LiZa Memories Photography',
+      metaDescription: 'Personal portrait photography in Graz with calm guidance, natural posing and professionally edited images.',
+      ogTitle: 'Portrait Photography Graz | LiZa Memories Photography',
+      ogDescription: 'Natural portraits in Graz with gentle direction and images that genuinely feel like you.',
+      breadcrumbCurrent: 'Portrait Photography Graz',
+      hero: {
+        eyebrow: 'Portrait Photography',
+        title: 'Personal portraits that feel natural and genuinely show who you are.',
+        lead: 'A portrait session can feel light and uncomplicated. With calm guidance, carefully chosen image variations and attention to small details, we create portraits in which you recognize and truly like yourself.',
+        primary: 'Inquire about a portrait session',
+        secondary: 'View portfolio',
+        points: [
+          { label: 'Duration', value: 'Around 20 to 30 minutes depending on the package' },
+          { label: 'Looks', value: 'One or two outfits and different image variations are possible' },
+          { label: 'Image delivery', value: 'Usually available within 72 hours' }
+        ],
+        imageAlt: 'Natural portrait of Emina in a warm setting'
+      },
+      section1: {
+        title: 'What makes your portrait session special',
+        sub: 'Clear preparation, relaxed direction and enough room for images that feel right for you.',
+        card1: {
+          title: 'Natural and personal',
+          text: 'You do not need camera experience or a list of poses. I guide you calmly throughout the session and make sure your posture, expression and overall image feel harmonious.',
+          items: [
+            'Gentle direction instead of stiff or overly complicated posing.',
+            'Different outfits and image looks are possible depending on the package.',
+            'A careful selection and professional edit of your favorite portraits.'
+          ]
+        },
+        card2: {
+          title: 'Relaxed process',
+          steps: [
+            'A short inquiry with your preferred date and the reason for your portraits.',
+            'Personal planning for clothing, background and important details.',
+            'A calm session with clear direction and fast image editing.'
+          ]
+        }
+      },
+      section2: {
+        title: 'Frequently asked questions about portrait sessions',
+        sub: 'The key answers to help you feel prepared and comfortable from the start.',
+        faqs: [
+          {
+            q: 'Do I need experience in front of the camera?',
+            a: 'No. During the session, I show you step by step which posture and expression work well. You do not need to prepare any poses beforehand.'
+          },
+          {
+            q: 'What should I bring to my portrait session?',
+            a: 'Bring one or two outfits in which you feel comfortable. Calm colors and clothing without large logos look especially harmonious. Together we choose what best suits the desired image style.'
+          }
+        ]
+      },
+      gallery: {
+        title: 'Portrait',
+        sub: 'Natural portrait photography with a calm visual style and personal expression.'
+      },
+      cta: {
+        title: 'Inquire about a portrait session in Graz',
+        text: 'The <strong>Small Memory</strong> package starts at <strong>99 EUR</strong> and includes a 20-minute session, 3 edited images, 1 outfit and 1 image look.',
+        primary: 'Inquire now',
+        secondary: 'View packages'
+      },
+      contact: {
+        title: 'Direct contact',
+        moreServices: '<a href="babybauch-shooting-graz.html">Maternity</a> · <a href="newborn-fotografie-graz.html">Newborn</a> · <a href="familienfotografie-graz.html">Family</a>'
+      }
+    },
+    bs: {
+      metaTitle: 'Portretno fotografisanje Graz | LiZa Memories Photography',
+      metaDescription: 'Lično portretno fotografisanje u Grazu uz mirno vođenje, prirodne poze i profesionalno obrađene fotografije.',
+      ogTitle: 'Portretno fotografisanje Graz | LiZa Memories Photography',
+      ogDescription: 'Prirodni portreti u Grazu uz nježno vođenje i fotografije na kojima se prepoznajete.',
+      breadcrumbCurrent: 'Portretno fotografisanje Graz',
+      hero: {
+        eyebrow: 'Portretno fotografisanje',
+        title: 'Lični portreti koji djeluju prirodno i zaista pokazuju vas.',
+        lead: 'Portretno fotografisanje može biti lagano i jednostavno. Uz mirno vođenje, pažljivo odabrane varijante fotografija i osjećaj za male detalje nastaju portreti na kojima se prepoznajete i rado gledate.',
+        primary: 'Pošalji upit za portret',
+        secondary: 'Pogledaj portfolio',
+        points: [
+          { label: 'Trajanje', value: 'Oko 20 do 30 minuta, zavisno od paketa' },
+          { label: 'Izgledi', value: 'Mogući su jedan ili dva outfita i različite varijante fotografija' },
+          { label: 'Isporuka fotografija', value: 'Najčešće dostupno u roku od 72 sata' }
+        ],
+        imageAlt: 'Prirodan portret Emine u toplom ambijentu'
+      },
+      section1: {
+        title: 'Šta vaše portretno fotografisanje čini posebnim',
+        sub: 'Jasna priprema, opušteno vođenje i dovoljno prostora za fotografije koje vam odgovaraju.',
+        card1: {
+          title: 'Prirodno i lično',
+          text: 'Nije vam potrebno iskustvo pred kamerom niti morate znati kako pozirati. Mirno vas vodim kroz fotografisanje i pazim da držanje, izraz i cjelokupan izgled fotografije budu skladni.',
+          items: [
+            'Nježno vođenje umjesto krutih ili prenaglašenih poza.',
+            'Zavisno od paketa mogući su različiti outfiti i izgledi fotografija.',
+            'Pažljiv izbor i profesionalna obrada vaših omiljenih portreta.'
+          ]
+        },
+        card2: {
+          title: 'Opušten tok',
+          steps: [
+            'Kratak upit sa željenim datumom i razlogom za portrete.',
+            'Lični dogovor o odjeći, pozadini i važnim detaljima.',
+            'Mirno fotografisanje uz jasno vođenje i brzu obradu fotografija.'
+          ]
+        }
+      },
+      section2: {
+        title: 'Česta pitanja o portretnom fotografisanju',
+        sub: 'Najvažniji odgovori kako biste se od početka osjećali dobro pripremljeno.',
+        faqs: [
+          {
+            q: 'Da li mi je potrebno iskustvo pred kamerom?',
+            a: 'Ne. Tokom fotografisanja pokazujem vam korak po korak koje držanje i izraz dobro funkcionišu. Ne morate unaprijed razmišljati o pozama.'
+          },
+          {
+            q: 'Šta trebam ponijeti na portretno fotografisanje?',
+            a: 'Ponesite jedan ili dva outfita u kojima se osjećate ugodno. Mirne boje i odjeća bez velikih logotipa djeluju posebno skladno. Zajedno biramo ono što najbolje odgovara željenom izgledu fotografija.'
+          }
+        ]
+      },
+      gallery: {
+        title: 'Portret',
+        sub: 'Prirodno portretno fotografisanje sa mirnim vizuelnim stilom i ličnim izrazom.'
+      },
+      cta: {
+        title: 'Upit za portretno fotografisanje u Grazu',
+        text: 'Paket <strong>Mala uspomena</strong> počinje od <strong>99 EUR</strong> i uključuje 20 minuta fotografisanja, 3 obrađene fotografije, 1 outfit i 1 izgled fotografije.',
+        primary: 'Pošalji upit',
+        secondary: 'Pogledaj pakete'
+      },
+      contact: {
+        title: 'Direktan kontakt',
+        moreServices: '<a href="babybauch-shooting-graz.html">Trudničko</a> · <a href="newborn-fotografie-graz.html">Novorođenčad</a> · <a href="familienfotografie-graz.html">Porodica</a>'
+      }
+    }
+  };
+
   pages.babybauch = {
     de: {
       metaTitle: 'Babybauch Shooting in Graz | LiZa Memories Photography',
@@ -957,7 +1231,7 @@
       },
       cta: {
         title: 'Babybauch Shooting in Graz anfragen',
-        text: 'Das Paket <strong>Liebe im Bauch</strong> startet aktuell bei <strong>299 EUR</strong> und beinhaltet ca. 60 Minuten Shooting, 14 bearbeitete Bilder sowie Partner und Geschwister ohne Aufpreis.',
+        text: 'Das Paket <strong>Mama & Bauch</strong> startet bei <strong>179 EUR</strong> und beinhaltet 30 Minuten Shooting, 5 bearbeitete Bilder und 1 Outfit beziehungsweise Bildset.',
         primary: 'Jetzt anfragen',
         secondary: 'Zu den Preisen'
       },
@@ -1029,7 +1303,7 @@
       },
       cta: {
         title: 'Inquire about a maternity session in Graz',
-        text: 'The <strong>Growing Love</strong> package currently starts at <strong>299 EUR</strong> and includes around 60 minutes of shooting time, 14 edited images and partner or sibling participation at no extra cost.',
+        text: 'The <strong>Mama & Bump</strong> package starts at <strong>179 EUR</strong> and includes a 30-minute session, 5 edited images and 1 outfit or image set.',
         primary: 'Inquire now',
         secondary: 'View pricing'
       },
@@ -1101,7 +1375,7 @@
       },
       cta: {
         title: 'Upit za trudničko fotografisanje u Grazu',
-        text: 'Paket <strong>Ljubav u iščekivanju</strong> trenutno počinje od <strong>299 EUR</strong> i uključuje oko 60 minuta fotografisanja, 14 obrađenih fotografija te partnera i djecu bez doplate.',
+        text: 'Paket <strong>Mama i trbuščić</strong> počinje od <strong>179 EUR</strong> i uključuje 30 minuta fotografisanja, 5 obrađenih fotografija i 1 outfit odnosno set.',
         primary: 'Pošalji upit',
         secondary: 'Pogledaj cijene'
       },
@@ -1111,6 +1385,240 @@
       },
       footer: {
         links: ['Početna', 'Novorođenčad', 'Porodica', 'Impresum', 'Zaštita podataka']
+      }
+    }
+  };
+
+  pages.combo = {
+    de: {
+      metaTitle: 'Babybauch & Neugeborenen-Shooting Graz | LiZa Memories Photography',
+      metaDescription: 'Babybauch- und Neugeborenen-Shooting in Graz als liebevolle Kombination mit zwei aufeinander abgestimmten Shootings und attraktivem Preisvorteil.',
+      ogTitle: 'Babybauch & Neugeborenen-Kombi in Graz | LiZa Memories Photography',
+      ogDescription: 'Zwei besondere Lebensphasen, eine vertraute Begleitung und eine einheitliche Bildsprache.',
+      breadcrumbCurrent: 'Babybauch & Neugeborenen-Kombi',
+      hero: {
+        eyebrow: 'Babybauch & Neugeborenen-Kombi',
+        title: 'Vom Babybauch bis zu den ersten Tagen mit eurem kleinen Wunder.',
+        lead: 'Diese Kombination verbindet euer Babybauch-Shooting mit einem späteren Neugeborenen-Shooting. So entstehen zwei aufeinander abgestimmte Bildserien, die eure Vorfreude und die erste Zeit mit eurem Baby in einer einheitlichen, liebevollen Bildsprache erzählen.',
+        primary: 'Kombi anfragen',
+        secondary: 'Portfolio ansehen',
+        points: [
+          { label: '2 Shootings', value: 'Babybauch und Neugeborene gemeinsam geplant' },
+          { label: 'Preisvorteil', value: 'Alle Kombi-Pakete sind günstiger als zwei vergleichbare Einzelbuchungen' },
+          { label: 'Gemeinsamer Stil', value: 'Eine harmonische Bildsprache von der Schwangerschaft bis zum Baby' }
+        ],
+        imageAlt: 'Kombination aus Babybauch- und Neugeborenenfotografie in Graz'
+      },
+      section1: {
+        title: 'Warum sich die gemeinsame Planung lohnt',
+        sub: 'Zwei besondere Shootings, eine vertraute Begleitung und ein stimmiges Ergebnis von Anfang an.',
+        card1: {
+          title: 'Ein roter Faden',
+          text: 'Beide Shootings werden gemeinsam geplant und fotografisch aufeinander abgestimmt. So müsst ihr euch nicht zweimal neu orientieren und bekommt Erinnerungen, die sichtbar zusammengehören.',
+          items: [
+            'Babybauch- und Neugeborenenbilder in einer harmonischen Bildsprache.',
+            'Partner und Geschwister können je nach Paket eingebunden werden.',
+            'Ein attraktiver Preisvorteil gegenüber vergleichbaren Einzelbuchungen.'
+          ]
+        },
+        card2: {
+          title: 'Entspannter Ablauf',
+          steps: [
+            'Das Babybauch-Shooting planen wir idealerweise zwischen der 28. und 34. Schwangerschaftswoche.',
+            'Den Neugeborenen-Termin halten wir rund um den errechneten Geburtstermin flexibel.',
+            'Beide Shootings finden ruhig, persönlich und mit schneller Bildbearbeitung statt.'
+          ]
+        }
+      },
+      section2: {
+        title: 'Häufige Fragen zur Kombi',
+        sub: 'Die wichtigsten Antworten für eine entspannte Planung beider Shootings.',
+        faqs: [
+          {
+            q: 'Wann sollten wir die Kombination buchen?',
+            a: 'Am besten meldet ihr euch schon während der Schwangerschaft. So können wir das Babybauch-Shooting rechtzeitig planen und rund um den errechneten Termin genug Flexibilität für das Neugeborenen-Shooting lassen.'
+          },
+          {
+            q: 'Müssen beide Termine sofort feststehen?',
+            a: 'Nein. Den Babybauch-Termin vereinbaren wir vorab. Der Termin für das Neugeborenen-Shooting wird flexibel an die tatsächliche Geburt angepasst.'
+          },
+          {
+            q: 'Können Partner und Geschwister dabei sein?',
+            a: 'Ja, sehr gern. Je nach Paket können Partner und Geschwister bei beiden Shootings integriert werden. Die genauen Leistungen findet ihr transparent in der Paketübersicht.'
+          },
+          {
+            q: 'Wie groß ist der Preisvorteil?',
+            a: 'Schon das kleinste Kombi-Paket ist 79 EUR günstiger als zwei vergleichbare Einzelbuchungen. Bei den größeren Paketen steigt zusätzlich die Anzahl der enthaltenen Bilder und Bildsets.'
+          }
+        ]
+      },
+      gallery: {
+        title: 'Galerie',
+        sub: 'Babybauch- und Neugeborenenbilder mit einer ruhigen, liebevollen und aufeinander abgestimmten Bildsprache.'
+      },
+      cta: {
+        title: 'Babybauch & Neugeborenen-Kombi anfragen',
+        text: 'Das Paket <strong>Zwei kleine Erinnerungen</strong> startet bei <strong>299 EUR</strong> und beinhaltet zwei Shootings mit je 5 bearbeiteten Bildern, je 1 Bildset und insgesamt 10 Bildern.',
+        primary: 'Kombi anfragen',
+        secondary: 'Pakete ansehen'
+      },
+      contact: {
+        title: 'Direkter Kontakt',
+        moreServices: '<a href="babybauch-shooting-graz.html">Babybauch</a> · <a href="newborn-fotografie-graz.html">Neugeborene</a> · <a href="familienfotografie-graz.html">Familie</a>'
+      }
+    },
+    en: {
+      metaTitle: 'Maternity & Newborn Photography Graz | LiZa Memories Photography',
+      metaDescription: 'A maternity and newborn photography bundle in Graz with two coordinated sessions, a consistent visual style and attractive package savings.',
+      ogTitle: 'Maternity & Newborn Bundle Graz | LiZa Memories Photography',
+      ogDescription: 'Two special life stages, one familiar photographer and a beautifully consistent visual story.',
+      breadcrumbCurrent: 'Maternity & Newborn Bundle',
+      hero: {
+        eyebrow: 'Maternity & Newborn Bundle',
+        title: 'From your growing belly to the first days with your little wonder.',
+        lead: 'This bundle combines your maternity session with a later newborn session. The result is two coordinated image series that tell the story of your anticipation and your baby\'s first days in one gentle and consistent visual style.',
+        primary: 'Inquire about the bundle',
+        secondary: 'View portfolio',
+        points: [
+          { label: '2 sessions', value: 'Maternity and newborn photography planned together' },
+          { label: 'Package savings', value: 'Every bundle costs less than two comparable individual bookings' },
+          { label: 'Consistent style', value: 'A harmonious visual story from pregnancy to your baby\'s first days' }
+        ],
+        imageAlt: 'Combination of maternity and newborn photography in Graz'
+      },
+      section1: {
+        title: 'Why planning both sessions together is worthwhile',
+        sub: 'Two meaningful sessions, one familiar photographer and a coherent result from the very beginning.',
+        card1: {
+          title: 'One consistent story',
+          text: 'Both sessions are planned together and photographically coordinated. You do not need to start over twice, and you receive memories that visibly belong together.',
+          items: [
+            'Maternity and newborn images in one harmonious visual style.',
+            'Partners and siblings can be included depending on the package.',
+            'Attractive savings compared with equivalent individual bookings.'
+          ]
+        },
+        card2: {
+          title: 'Relaxed process',
+          steps: [
+            'We ideally schedule the maternity session between weeks 28 and 34.',
+            'The newborn appointment remains flexible around your estimated due date.',
+            'Both sessions are calm, personal and followed by fast image editing.'
+          ]
+        }
+      },
+      section2: {
+        title: 'Frequently asked questions about the bundle',
+        sub: 'The key answers for planning both sessions comfortably and without pressure.',
+        faqs: [
+          {
+            q: 'When should we book the bundle?',
+            a: 'Ideally, contact me during pregnancy. This gives us time to schedule the maternity session and keep enough flexibility around your due date for the newborn session.'
+          },
+          {
+            q: 'Do both dates have to be fixed immediately?',
+            a: 'No. We set the maternity date in advance. The newborn appointment is then adjusted flexibly to your baby\'s actual arrival.'
+          },
+          {
+            q: 'Can partners and siblings take part?',
+            a: 'Yes, absolutely. Depending on the package, partners and siblings can be included in both sessions. The exact inclusions are listed clearly in the package overview.'
+          },
+          {
+            q: 'How much do we save?',
+            a: 'Even the smallest bundle saves 79 EUR compared with two equivalent individual bookings. The larger packages also include more images and prepared image sets.'
+          }
+        ]
+      },
+      gallery: {
+        title: 'Gallery',
+        sub: 'Maternity and newborn images with a calm, loving and beautifully coordinated visual style.'
+      },
+      cta: {
+        title: 'Inquire about the maternity & newborn bundle',
+        text: 'The <strong>Two Little Memories</strong> package starts at <strong>299 EUR</strong> and includes two sessions with 5 edited images and 1 image set per session, for a total of 10 images.',
+        primary: 'Inquire about the bundle',
+        secondary: 'View packages'
+      },
+      contact: {
+        title: 'Direct contact',
+        moreServices: '<a href="babybauch-shooting-graz.html">Maternity</a> · <a href="newborn-fotografie-graz.html">Newborn</a> · <a href="familienfotografie-graz.html">Family</a>'
+      }
+    },
+    bs: {
+      metaTitle: 'Trudničko & fotografisanje novorođenčeta Graz | LiZa Memories Photography',
+      metaDescription: 'Kombinacija trudničkog i fotografisanja novorođenčeta u Grazu sa dva usklađena termina, jedinstvenim stilom i povoljnijom cijenom.',
+      ogTitle: 'Trudničko & novorođenče paket Graz | LiZa Memories Photography',
+      ogDescription: 'Dvije posebne životne faze, poznata fotografkinja i skladna zajednička priča.',
+      breadcrumbCurrent: 'Trudničko & novorođenče paket',
+      hero: {
+        eyebrow: 'Trudničko & novorođenče paket',
+        title: 'Od trudničkog stomaka do prvih dana sa vašim malim čudom.',
+        lead: 'Ova kombinacija povezuje trudničko fotografisanje sa kasnijim fotografisanjem novorođenčeta. Tako nastaju dvije usklađene serije koje vašu radost iščekivanja i prve dane sa bebom pričaju u jednom nježnom i skladnom vizuelnom stilu.',
+        primary: 'Pošalji upit za paket',
+        secondary: 'Pogledaj portfolio',
+        points: [
+          { label: '2 fotografisanja', value: 'Trudničko i fotografisanje novorođenčeta planirani zajedno' },
+          { label: 'Povoljnija cijena', value: 'Svaki paket je povoljniji od dvije uporedive pojedinačne rezervacije' },
+          { label: 'Zajednički stil', value: 'Skladna vizuelna priča od trudnoće do prvih dana sa bebom' }
+        ],
+        imageAlt: 'Kombinacija trudničkog i fotografisanja novorođenčeta u Grazu'
+      },
+      section1: {
+        title: 'Zašto se isplati planirati oba fotografisanja zajedno',
+        sub: 'Dva posebna fotografisanja, poznata fotografkinja i skladan rezultat od samog početka.',
+        card1: {
+          title: 'Jedna povezana priča',
+          text: 'Oba fotografisanja planiraju se zajedno i vizuelno usklađuju. Ne morate dva puta počinjati ispočetka, a dobijate uspomene koje jasno pripadaju jedna drugoj.',
+          items: [
+            'Trudničke i fotografije novorođenčeta u skladnom vizuelnom stilu.',
+            'Partner i djeca mogu biti uključeni, zavisno od paketa.',
+            'Povoljnija cijena u odnosu na uporedive pojedinačne rezervacije.'
+          ]
+        },
+        card2: {
+          title: 'Opušten tok',
+          steps: [
+            'Trudničko fotografisanje idealno planiramo između 28. i 34. sedmice.',
+            'Termin za novorođenče ostaje fleksibilan oko očekivanog datuma poroda.',
+            'Oba fotografisanja su mirna, lična i praćena brzom obradom fotografija.'
+          ]
+        }
+      },
+      section2: {
+        title: 'Česta pitanja o kombinovanom paketu',
+        sub: 'Najvažniji odgovori za opušteno planiranje oba fotografisanja.',
+        faqs: [
+          {
+            q: 'Kada trebamo rezervisati kombinovani paket?',
+            a: 'Najbolje je da se javite već tokom trudnoće. Tako možemo na vrijeme planirati trudničko fotografisanje i ostaviti dovoljno fleksibilnosti za termin novorođenčeta.'
+          },
+          {
+            q: 'Moraju li oba termina odmah biti određena?',
+            a: 'Ne. Termin trudničkog fotografisanja dogovaramo unaprijed, dok termin za novorođenče fleksibilno prilagođavamo stvarnom datumu rođenja.'
+          },
+          {
+            q: 'Mogu li partner i djeca učestvovati?',
+            a: 'Da, naravno. Zavisno od paketa, partner i djeca mogu biti uključeni u oba fotografisanja. Tačan obim svake ponude jasno je naveden u pregledu paketa.'
+          },
+          {
+            q: 'Kolika je ušteda?',
+            a: 'Već najmanji kombinovani paket je 79 EUR povoljniji od dvije uporedive pojedinačne rezervacije. Veći paketi dodatno uključuju više fotografija i pripremljenih setova.'
+          }
+        ]
+      },
+      gallery: {
+        title: 'Galerija',
+        sub: 'Trudničke i fotografije novorođenčeta u mirnom, nježnom i međusobno usklađenom vizuelnom stilu.'
+      },
+      cta: {
+        title: 'Upit za trudničko & novorođenče paket',
+        text: 'Paket <strong>Dvije male uspomene</strong> počinje od <strong>299 EUR</strong> i uključuje dva fotografisanja sa po 5 obrađenih fotografija i 1 setom, ukupno 10 fotografija.',
+        primary: 'Pošalji upit za paket',
+        secondary: 'Pogledaj pakete'
+      },
+      contact: {
+        title: 'Direktan kontakt',
+        moreServices: '<a href="babybauch-shooting-graz.html">Trudničko</a> · <a href="newborn-fotografie-graz.html">Novorođenčad</a> · <a href="familienfotografie-graz.html">Porodica</a>'
       }
     }
   };
@@ -1176,7 +1684,7 @@
       },
       cta: {
         title: 'Neugeborenen-Shooting in Graz anfragen',
-        text: 'Das beliebte Paket <strong>Willkommen, kleines Wunder</strong> startet aktuell bei <strong>349 EUR</strong> und beinhaltet ca. 2 Stunden Shooting, 18 bearbeitete Bilder und Familienbilder inklusive.',
+        text: 'Das Paket <strong>Kleines Wunder</strong> startet bei <strong>199 EUR</strong> und beinhaltet bis zu 75 Minuten Shooting, 6 bearbeitete Bilder, 1 vorbereitetes Bildset und Babyaufnahmen.',
         primary: 'Termin anfragen',
         secondary: 'Preise ansehen'
       },
@@ -1248,7 +1756,7 @@
       },
       cta: {
         title: 'Inquire about a newborn session in Graz',
-        text: 'The popular <strong>Welcome, Little Wonder</strong> package currently starts at <strong>349 EUR</strong> and includes around 2 hours of shooting time, 18 edited images and family portraits.',
+        text: 'The <strong>Little Wonder</strong> package starts at <strong>199 EUR</strong> and includes up to 75 minutes, 6 edited images, 1 prepared image set and baby portraits.',
         primary: 'Inquire now',
         secondary: 'View pricing'
       },
@@ -1320,7 +1828,7 @@
       },
       cta: {
         title: 'Upit za fotografisanje novorođenčadi u Grazu',
-        text: 'Popularni paket <strong>Dobrodošlo, malo čudo</strong> trenutno počinje od <strong>349 EUR</strong> i uključuje oko 2 sata fotografisanja, 18 obrađenih fotografija i porodične fotografije.',
+        text: 'Paket <strong>Malo čudo</strong> počinje od <strong>199 EUR</strong> i uključuje do 75 minuta fotografisanja, 6 obrađenih fotografija, 1 pripremljeni set i fotografije bebe.',
         primary: 'Pošalji upit',
         secondary: 'Pogledaj cijene'
       },
@@ -1395,7 +1903,7 @@
       },
       cta: {
         title: 'Familienfotografie in Graz anfragen',
-        text: 'Das Paket <strong>Familienzeit</strong> startet aktuell bei <strong>329 EUR</strong> und beinhaltet ca. 60 Minuten Shooting, 16 bearbeitete Bilder sowie viel Raum für natürliche Familienmomente.',
+        text: 'Das Paket <strong>Kleine Familienzeit</strong> startet bei <strong>189 EUR</strong> und beinhaltet 30 Minuten Shooting, 5 bearbeitete Bilder und gemeinsame Familienaufnahmen.',
         primary: 'Jetzt anfragen',
         secondary: 'Pakete ansehen'
       },
@@ -1467,7 +1975,7 @@
       },
       cta: {
         title: 'Inquire about family photography in Graz',
-        text: 'The <strong>Family Time</strong> package currently starts at <strong>329 EUR</strong> and includes around 60 minutes of shooting time, 16 edited images and plenty of space for natural family moments.',
+        text: 'The <strong>Little Family Time</strong> package starts at <strong>189 EUR</strong> and includes a 30-minute session, 5 edited images and shared family portraits.',
         primary: 'Inquire now',
         secondary: 'View packages'
       },
@@ -1539,7 +2047,7 @@
       },
       cta: {
         title: 'Upit za porodično fotografisanje u Grazu',
-        text: 'Paket <strong>Porodično vrijeme</strong> trenutno počinje od <strong>329 EUR</strong> i uključuje oko 60 minuta fotografisanja, 16 obrađenih fotografija i mnogo prostora za prirodne porodične trenutke.',
+        text: 'Paket <strong>Malo porodično vrijeme</strong> počinje od <strong>189 EUR</strong> i uključuje 30 minuta fotografisanja, 5 obrađenih fotografija i zajedničke porodične portrete.',
         primary: 'Pošalji upit',
         secondary: 'Pogledaj pakete'
       },
@@ -1568,7 +2076,7 @@
         secondary: 'Portfolio ansehen',
         points: [
           { label: 'Anlass', value: 'Standesamt, kleine Hochzeiten, Taufen und Feiern im kleinen Rahmen' },
-          { label: 'Preis', value: 'Pakete für Standesamt und kleine Feiern starten aktuell ab 639 EUR' },
+          { label: 'Preis', value: 'Pakete für Standesamt, Taufen und kleine Feiern starten bei 299 EUR' },
           { label: 'Begleitung', value: 'Ruhig, stilvoll und unaufdringlich mit Fokus auf echte Momente' }
         ],
         imageAlt: 'Paarfoto eines Hochzeitspaares in Graz'
@@ -1614,7 +2122,7 @@
       },
       cta: {
         title: 'Hochzeitsfotograf in Graz anfragen',
-        text: 'Wenn ihr euch für Standesamt oder kleine Feier eine elegante, emotionale und unaufdringliche fotografische Begleitung wünscht, könnt ihr direkt über die Startseite anfragen.',
+        text: 'Das Paket <strong>Ja, ich will</strong> startet bei <strong>299 EUR</strong> und beinhaltet bis zu 1 Stunde Begleitung, Trauung und Gruppenbilder, ca. 20 professionell bearbeitete Bilder und eine private Online-Galerie.',
         primary: 'Termin anfragen',
         secondary: 'Preise ansehen'
       },
@@ -1640,7 +2148,7 @@
         secondary: 'View portfolio',
         points: [
           { label: 'Occasion', value: 'Civil ceremonies, intimate weddings, baptisms and small celebrations' },
-          { label: 'Price', value: 'Packages for civil ceremonies and intimate celebrations currently start at 639 EUR' },
+          { label: 'Price', value: 'Packages for civil ceremonies, baptisms and intimate celebrations start at 299 EUR' },
           { label: 'Coverage', value: 'Calm, elegant and unobtrusive with a focus on real moments' }
         ],
         imageAlt: 'Wedding couple portrait in Graz'
@@ -1686,7 +2194,7 @@
       },
       cta: {
         title: 'Inquire about wedding photography in Graz',
-        text: 'If you want elegant, emotional and unobtrusive coverage for your civil ceremony or intimate celebration, you can inquire directly through the homepage.',
+        text: 'The <strong>Yes, I Do</strong> package starts at <strong>299 EUR</strong> and includes up to 1 hour of coverage, the ceremony and group portraits, around 20 professionally edited images and a private online gallery.',
         primary: 'Inquire now',
         secondary: 'View pricing'
       },
@@ -1712,7 +2220,7 @@
         secondary: 'Pogledaj portfolio',
         points: [
           { label: 'Povod', value: 'Vjenčanja, krštenja i proslave u manjem krugu' },
-          { label: 'Cijena', value: 'Paketi za vjenčanja i manje proslave trenutno počinju od 639 EUR' },
+          { label: 'Cijena', value: 'Paketi za vjenčanja, krštenja i manje proslave počinju od 299 EUR' },
           { label: 'Pratnja', value: 'Mirna, elegantna i nenametljiva pratnja sa fokusom na stvarne trenutke' }
         ],
         imageAlt: 'Portret vjenčanog para u Grazu'
@@ -1758,7 +2266,7 @@
       },
       cta: {
         title: 'Upit za vjenčanog fotografa u Grazu',
-        text: 'Ako želite elegantnu, emotivnu i nenametljivu fotografsku pratnju za vjenčanje ili malu proslavu, upit možete poslati direktno preko početne stranice.',
+        text: 'Paket <strong>Da, želim</strong> počinje od <strong>299 EUR</strong> i uključuje do 1 sat pratnje, ceremoniju i grupne fotografije, oko 20 profesionalno obrađenih fotografija i privatnu online galeriju.',
         primary: 'Pošalji upit',
         secondary: 'Pogledaj cijene'
       },

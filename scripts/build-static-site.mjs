@@ -13,6 +13,9 @@ const RENDER_PAGES = [
   'ueber-mich.html',
   'ueber-mich-en.html',
   'ueber-mich-bs.html',
+  'portraitfotografie-graz.html',
+  'portraitfotografie-graz-en.html',
+  'portraitfotografie-graz-bs.html',
   'babybauch-shooting-graz.html',
   'babybauch-shooting-graz-en.html',
   'babybauch-shooting-graz-bs.html',
@@ -24,7 +27,13 @@ const RENDER_PAGES = [
   'familienfotografie-graz-bs.html',
   'hochzeitsfotograf-graz.html',
   'hochzeitsfotograf-graz-en.html',
-  'hochzeitsfotograf-graz-bs.html'
+  'hochzeitsfotograf-graz-bs.html',
+  'babybauch-und-neugeborenen-shooting-graz.html',
+  'babybauch-und-neugeborenen-shooting-graz-en.html',
+  'babybauch-und-neugeborenen-shooting-graz-bs.html',
+  'preise.html',
+  'preise-en.html',
+  'preise-bs.html'
 ];
 const ALL_HTML = [
   ...RENDER_PAGES,
@@ -429,6 +438,16 @@ function collectImageEntries(document) {
   return entries;
 }
 
+async function isOutputCurrent(outputPath, inputPaths) {
+  try {
+    const output = await fs.stat(outputPath);
+    const inputs = await Promise.all(inputPaths.map((inputPath) => fs.stat(inputPath)));
+    return inputs.every((input) => input.mtimeMs <= output.mtimeMs);
+  } catch {
+    return false;
+  }
+}
+
 async function buildResponsiveImages() {
   const imageRefs = new Set();
 
@@ -461,14 +480,16 @@ async function buildResponsiveImages() {
 
       const outputRel = `${RESPONSIVE_DIR}/${baseName}-${width}w${extension}`;
       const outputPath = path.join(ROOT, outputRel);
-      const pipeline = sharp(inputPath).resize({ width, withoutEnlargement: true });
+      if (!(await isOutputCurrent(outputPath, [inputPath]))) {
+        const pipeline = sharp(inputPath).resize({ width, withoutEnlargement: true });
 
-      if (extension === '.webp') {
-        await pipeline.webp({ quality: 82 }).toFile(outputPath);
-      } else if (extension === '.png') {
-        await pipeline.png({ compressionLevel: 9 }).toFile(outputPath);
-      } else {
-        await pipeline.jpeg({ quality: 84, mozjpeg: true }).toFile(outputPath);
+        if (extension === '.webp') {
+          await pipeline.webp({ quality: 82 }).toFile(outputPath);
+        } else if (extension === '.png') {
+          await pipeline.png({ compressionLevel: 9 }).toFile(outputPath);
+        } else {
+          await pipeline.jpeg({ quality: 84, mozjpeg: true }).toFile(outputPath);
+        }
       }
 
       variants.push({ path: outputRel.replace(/\\/g, '/'), width });
@@ -482,8 +503,14 @@ async function buildResponsiveImages() {
 }
 
 async function createOgShareImage() {
-  await fs.mkdir(path.join(ROOT, SOCIAL_DIR), { recursive: true });
+  const outputPath = path.join(ROOT, OG_IMAGE_REL);
   const collageImages = ['33.webp', 'hero-bild.webp', '1.webp', '20.webp', 'DSC02070.webp', '24.webp'];
+  const collagePaths = collageImages.map((image) => path.join(ROOT, image));
+  if (await isOutputCurrent(outputPath, collagePaths)) {
+    return;
+  }
+
+  await fs.mkdir(path.join(ROOT, SOCIAL_DIR), { recursive: true });
   const containedImages = new Set(['1.webp', 'DSC02070.webp']);
   const tileWidth = 386;
   const tileHeight = 300;
@@ -538,7 +565,7 @@ async function createOgShareImage() {
   })
     .composite(composites)
     .jpeg({ quality: 88, mozjpeg: true })
-    .toFile(path.join(ROOT, OG_IMAGE_REL));
+    .toFile(outputPath);
 }
 
 async function renderPage(fileName) {
@@ -619,6 +646,48 @@ ${items}
 `;
 }
 
+function buildPageSitemap() {
+  const lastModified = new Date().toISOString().slice(0, 10);
+  const groupedPages = new Map();
+
+  for (const fileName of RENDER_PAGES) {
+    const baseFile = fileName.replace(/-(en|bs)\.html$/i, '.html');
+    if (!groupedPages.has(baseFile)) {
+      groupedPages.set(baseFile, new Set());
+    }
+    groupedPages.get(baseFile).add(fileName);
+  }
+
+  const entries = RENDER_PAGES.map((fileName) => {
+    const baseFile = fileName.replace(/-(en|bs)\.html$/i, '.html');
+    const variants = groupedPages.get(baseFile) || new Set();
+    const alternates = [
+      ['de', baseFile],
+      ['en', baseFile.replace(/\.html$/i, '-en.html')],
+      ['bs', baseFile.replace(/\.html$/i, '-bs.html')]
+    ]
+      .filter(([, variant]) => variants.has(variant))
+      .map(([lang, variant]) => `    <xhtml:link rel="alternate" hreflang="${lang}" href="${escapeXml(absoluteUrl(publicPathFor(variant)))}" />`)
+      .join('\n');
+    const defaultLink = variants.has(baseFile)
+      ? `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(absoluteUrl(publicPathFor(baseFile)))}" />`
+      : '';
+
+    return `  <url>
+    <loc>${escapeXml(absoluteUrl(publicPathFor(fileName)))}</loc>
+    <lastmod>${lastModified}</lastmod>
+${alternates}${defaultLink}
+  </url>`;
+  }).join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+${entries}
+</urlset>
+`;
+}
+
 async function updateRobots() {
   const robotsPath = path.join(ROOT, 'robots.txt');
   let robots = await fs.readFile(robotsPath, 'utf8');
@@ -644,6 +713,7 @@ async function main() {
 
   const imageSitemap = buildImageSitemap(imageEntriesByPage);
   await fs.writeFile(path.join(ROOT, 'image-sitemap.xml'), imageSitemap, 'utf8');
+  await fs.writeFile(path.join(ROOT, 'sitemap.xml'), buildPageSitemap(), 'utf8');
   await updateRobots();
 }
 

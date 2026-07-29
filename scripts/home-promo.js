@@ -15,14 +15,14 @@
       },
       bs: {
         badge: 'Popust za nove klijente',
-        text: '\u{1F337} Ekskluzivna ponuda dobrodoslice: 50% popusta na tvoje prvo fotografisanje. Ogranicen broj termina dostupan. \u2728'
+        text: '\u{1F337} Ekskluzivna ponuda dobrodo\u0161lice: 50% popusta na tvoje prvo fotografisanje. Ograni\u010den broj termina dostupan. \u2728'
       }
     }
   };
 
   const PROMO_STYLE_ID = 'homePromoStyles';
   const PROMO_BANNER_ID = 'homePromoBanner';
-  const PROMO_PRICE_SELECTOR = '#pricing .price .num';
+  const PROMO_PRICE_SELECTOR = '[data-promo-price]';
   const PRICE_PREFIX_BY_LANG = {
     de: 'ab',
     en: 'from',
@@ -107,7 +107,10 @@
     }).format(amount);
 
     const prefix = hasPrefix ? (PRICE_PREFIX_BY_LANG[lang] || PRICE_PREFIX_BY_LANG.de) : '';
-    return prefix ? `${prefix} \u20ac ${formattedAmount}` : `\u20ac ${formattedAmount}`;
+    if (lang === 'en') {
+      return `${prefix ? `${prefix} ` : ''}\u20ac${formattedAmount}`;
+    }
+    return `${prefix ? `${prefix} ` : ''}${formattedAmount} \u20ac`;
   }
 
   function ensurePriceData(node) {
@@ -219,7 +222,7 @@
         max-width: 980px;
       }
 
-      .price .num.promo-price {
+      [data-promo-price].promo-price {
         display: flex;
         align-items: center;
         flex-wrap: wrap;
@@ -375,11 +378,28 @@
     });
   }
 
+  function observePriceTargets() {
+    if (!document.body) {
+      return;
+    }
+
+    const observer = new MutationObserver(() => {
+      syncPricingPromo();
+    });
+
+    observer.observe(document.body, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['data-promo-price']
+    });
+  }
+
   function init() {
     injectStyles();
     renderBanner();
     syncBannerVisibility();
     observeLanguageChanges();
+    observePriceTargets();
   }
 
   if (document.readyState === 'loading') {
