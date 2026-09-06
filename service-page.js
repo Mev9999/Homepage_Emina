@@ -133,11 +133,13 @@
   const mobileNav = siteHeaderNav?.querySelector('.nav-links');
 
   function ensureServiceLinks(){
+    const lang = supportedLangs.includes(staticLang) ? staticLang : urlLanguage || DEFAULT_LANG;
     const menu = mobileNav?.querySelector('.services-dropdown .nav-dropdown-menu');
     if(menu){
       menu.replaceChildren(...serviceLinks.map((service) => {
         const link = document.createElement('a');
-        link.href = service.href;
+        link.href = buildLocalizedHref(service.href, lang);
+        link.textContent = common[lang].services[service.key];
         link.dataset.serviceKey = service.key;
         return link;
       }));
@@ -148,7 +150,8 @@
       const portfolio = footerLinks.querySelector('a');
       const links = serviceLinks.map((service) => {
         const link = document.createElement('a');
-        link.href = service.href;
+        link.href = buildLocalizedHref(service.href, lang);
+        link.textContent = common[lang].services[service.key];
         link.dataset.serviceKey = service.key;
         return link;
       });
@@ -156,7 +159,7 @@
     }
   }
 
-  ensureServiceLinks();
+
 
   if(siteHeaderNav && mobileNav){
     mobileNav.id = mobileNav.id || 'mobile-nav';
@@ -260,6 +263,8 @@
       }
     }
   };
+
+  ensureServiceLinks();
 
   const pages = {};
 

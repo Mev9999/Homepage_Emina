@@ -377,3 +377,9 @@
     border-radius: 24px;
   }
 }
+
+/* Long service names must fit narrow phone screens without horizontal overflow. */
+@media (max-width: 640px) {
+ .package-section-head > * { min-width: 0; }
+ .package-section-head h2 { font-size: clamp(1.6rem, 6.6vw, 2.45rem); overflow-wrap: anywhere; hyphens: auto; line-height: 1.12; }
+}
