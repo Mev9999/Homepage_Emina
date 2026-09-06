@@ -2634,6 +2634,11 @@ display: flex;
  .hero .art img { aspect-ratio: auto; height: auto; display: block; }
  .google-review-panel .btn { width: fit-content; max-width: 100%; min-width: 0; height: auto; white-space: normal; border-radius: 999px; padding: .85rem 1.3rem; line-height: 1.4; }
 }
+
+/* The mobile enquiry button must not occupy the logo's grid cell. */
+@media (max-width: 640px) {
+ header.site .header-cta { grid-area: cta; width: auto; justify-self: center; }
+}
 </style><script defer="" src="scripts/home-promo.js?v=20260415-1"></script><script defer="" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;89acfe7badc942e9896745b36e2c595a&quot;}"></script><style id="homePromoStyles">
       .promo-banner-wrap {
         background: linear-gradient(90deg, rgba(237, 202, 176, 0.96) 0%, rgba(231, 188, 165, 0.96) 52%, rgba(220, 169, 154, 0.96) 100%);
