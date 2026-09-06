@@ -2376,7 +2376,8 @@
     triggerEntries.forEach(({ trigger, image, index }) => {
       trigger.setAttribute('tabindex', '0');
       trigger.setAttribute('role', 'button');
-      trigger.setAttribute('aria-label', `${image.getAttribute('alt') || 'Bild'} öffnen`);
+      const openLabel = { de: 'Bild vergr\u00f6\u00dfern', en: 'Enlarge photo', bs: 'Uve\u0107aj fotografiju' }[document.documentElement.lang] || 'Enlarge photo';
+      trigger.setAttribute('aria-label', openLabel + ': ' + (image.getAttribute('alt') || ''));
       trigger.addEventListener('click', () => openLightbox(index));
       trigger.addEventListener('keydown', (event) => {
         if(event.key === 'Enter' || event.key === ' '){
