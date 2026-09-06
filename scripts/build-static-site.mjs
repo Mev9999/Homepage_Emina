@@ -145,6 +145,7 @@ function isContentImage(src) {
 }
 
 function getSizesForImage(img) {
+  if (img.hasAttribute("data-responsive-sizes")) return img.getAttribute("data-responsive-sizes");
   if (img.closest('.insta-grid')) {
     return '(max-width: 640px) calc((100vw - 2.6rem) / 2), (max-width: 1000px) calc((100vw - 3.2rem) / 3), 180px';
   }
